@@ -13,7 +13,7 @@ def double_to_single(sol):
         memory.add(e)
     return new_sol
 
-solution_list = [
+solution_list = [  # TEST1_seed1234.pkl solutions found by original algo from INF273 course.
     (3.5891863748332993, [[9, 7, 9, 3, 2, 2, 4, 5, 3, 6, 6, 8, 5, 8, 10, 7, 1, 4, 10, 1], []]),
     (5.150441003745926, [[2, 1, 2, 1, 9, 7, 5, 4, 4, 7, 5, 9, 8, 10, 10, 3, 8, 6, 6, 3], []]),
     (5.7705274165319915, [[6, 10, 9, 10, 1, 5, 6, 9, 1, 8, 4, 5, 8, 3, 4, 3, 2, 7, 7, 2], []]),
@@ -29,12 +29,10 @@ for i in range(9):
     pdp = dataset[i]
 
     best_solution, min_cost = None, float('inf')
-    seed_list = list(range(10))
-    for seed in seed_list:
-        solution, cost = simulated_annealing(pdp)
-        if cost < min_cost:
-            min_cost = cost
-            best_solution = solution
+    solution, cost = simulated_annealing(pdp)
+    if cost < min_cost:
+        min_cost = cost
+        best_solution = solution
 
     new_solution = double_to_single(solution_list[i][1])
     new_cost = objective_function(pdp, new_solution)

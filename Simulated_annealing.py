@@ -2,7 +2,9 @@ import time
 import math
 import random
 from Utils import objective_function
-from Operators import remove_insert, insert_1, insert_2, insert_3, insert_4, remove_xs, remove_s, remove_m, remove_l, remove_xl
+from Operators import remove_insert, insert_first, insert_greedy, insert_semi_greedy, insert_beam_search, insert_tour, \
+    remove_single_best, remove_double_best, remove_longest_tour_deviation, remove_tour_neighbors, remove_xs, remove_s, \
+    remove_m, remove_l, remove_xl
 
 
 def simulated_annealing(pdp):
@@ -21,14 +23,15 @@ def simulated_annealing(pdp):
 
 
     # Operators and logic
-    remove_operators = [remove_xs, remove_s, remove_m, remove_l, remove_xl]
-    remove_probs = [0.2, 0.2, 0.2, 0.2, 0.2]
+    remove_operators = [remove_single_best, remove_double_best, remove_longest_tour_deviation, remove_tour_neighbors,
+                        remove_xs, remove_s, remove_m, remove_l, remove_xl]
+    remove_probs = [0.111111, 0.111111, 0.111111, 0.111111, 0.111111, 0.111111, 0.111111, 0.111111, 0.111111]
     remove_indices = list(range(len(remove_operators)))
     remove_operator_scores = [0] * len(remove_operators)
     remove_operator_count = [0] * len(remove_operators)
     # --
-    insert_operators = [insert_1, insert_2, insert_3, insert_4]
-    insert_probs = [0.25, 0.25, 0.25, 0.25]
+    insert_operators = [ insert_first, insert_greedy, insert_semi_greedy, insert_beam_search, insert_tour]
+    insert_probs = [0.2, 0.2, 0.2, 0.2, 0.2]
     insert_indices = list(range(len(insert_operators)))
     insert_operators_scores = [0] * len(insert_operators)
     insert_operators_count = [0] * len(insert_operators)

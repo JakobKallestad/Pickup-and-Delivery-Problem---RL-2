@@ -17,23 +17,23 @@ class QNet(nn.Module):
 
         for m in self.modules():
             if isinstance(m, nn.Linear):
-                nn.init.xavier_uniform(m.weight)
+                nn.init.xavier_uniform_(m.weight)
 
     def forward(self, input):
         x = F.relu(self.fc_1(input))
-        policy = F.softmax(self.fc_2(x))
+        policy = F.softmax(self.fc_2(x), dim=-1)  # BIG DIFFERENCE HERE
         return policy
 
     @classmethod
-    def train_model(cls, net, transitions, optimizer):
+    def train_model(cls, net, transitions, optimizer, device):
         states, actions, rewards, masks = transitions.state, transitions.action, transitions.reward, transitions.mask
 
         states = torch.stack(states)
-        actions = torch.stack(actions).cuda()
-        rewards = torch.Tensor(rewards)
-        masks = torch.Tensor(masks)
+        actions = torch.stack(actions)
+        rewards = torch.tensor(rewards, device=device)
+        masks = torch.tensor(masks, device=device)
 
-        returns = torch.zeros_like(rewards).cuda()
+        returns = torch.zeros_like(rewards, device=device)
 
         running_return = 0
         for t in reversed(range(len(rewards))):
@@ -55,7 +55,8 @@ class QNet(nn.Module):
 
     def get_action(self, input):
         policy = self.forward(input)
-        policy = policy[0].data.cpu().numpy()
+        #policy = policy[0].data.cpu().numpy()
+        policy = policy.data.cpu().numpy()
 
         action = np.random.choice(self.num_outputs, 1, p=policy)[0]
         return action

@@ -7,7 +7,7 @@ class Memory(object):
     def __init__(self):
         self.memory = deque()
 
-    def push(self, state, next_state, action, reward, mask):
+    def push(self, state, next_state, action, reward, mask=1):
         self.memory.append(Transition(state, next_state, action, reward, mask))
 
     def sample(self):

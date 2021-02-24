@@ -7,4 +7,3 @@ lr = 0.001
 goal_score = 200
 log_interval = 10
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-x = True

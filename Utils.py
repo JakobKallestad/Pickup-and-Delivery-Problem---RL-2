@@ -1,8 +1,40 @@
+import numpy as np
 
 
 # euclidean distance
 def distance(p1, p2):
     return ((p1[0]-p2[0])**2 + (p1[1]-p2[1])**2)**0.5
+
+
+# max weight of tour
+def get_weights(pdp, solution):
+    current_weight = 0
+    weights = [0]
+    for e in solution:
+        current_weight += pdp.capacities[e-1]
+        weights.append(current_weight)
+    weights.append(0)
+    return weights
+
+
+def embed_solution(pdp, solution):
+    embedded_solution = np.zeros((len(solution), 11))
+    weights = get_weights(pdp, solution)
+    solution = [0] + solution[:] + [solution[-1]]
+    for index in range(1, pdp.size):
+        customer = solution[index]
+        embedded_input = []
+        embedded_input.append(pdp.capacities[customer-1])  # INSTANCE : capacity
+        embedded_input.extend(pdp.locations[customer])  # INSTANCE : location
+        embedded_input.append(1 - weights[index])  # SOLUTION : current free capacity
+        embedded_input.extend(pdp.locations[solution[index - 1]])  # SOLUTION : location of prev
+        embedded_input.extend(pdp.locations[solution[index + 1]])  # SOLUTION : location of next
+        embedded_input.append(pdp.dist_matrix[solution[index - 1], customer])  # SOLUTION : dist from prev to node
+        embedded_input.append(pdp.dist_matrix[customer, solution[index + 1]])  # SOLUTION : dist from node to next
+        embedded_input.append(pdp.dist_matrix[solution[index - 1], solution[index + 1]])  # SOLUTION : dist if current node removed
+        for embedded_input_index in range(len(embedded_input)):
+            embedded_solution[customer - 1, embedded_input_index] = embedded_input[embedded_input_index]
+    return embedded_solution
 
 
 # Calculates cost and feasibility of the solution:

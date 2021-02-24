@@ -29,7 +29,7 @@ def generate_problem(size=20):
     capacities[1::2] *= -1
 
     n_calls = size // 2
-    calls = [[i, i + 1] for i in range(n_calls+1)]
+    calls = [(None, None)] + [(i, i + 1) for i in range(1, size, 2)]
     dist_matrix = np.empty((size+1, size+1), dtype=np.float)
     for i in range(size+1):
         for j in range(i, size+1):
