@@ -18,9 +18,40 @@ class PDP:
         self.capacities = capacities
         self.calls = calls
         self.dist_matrix = dist_matrix
+        self.initialize_close_calls()
 
     def save_problem(self):
         pass
+
+    def initialize_close_calls(self):
+        self.distances = self.calculate_close_calls()
+
+    def calculate_close_calls(self):
+        max_sim_size = 21
+        distances = [None] * max_sim_size
+        prev_dists = list(zip([frozenset([i]) for i in range(1, self.n_calls + 1)], [0] * self.n_calls))
+        for q in range(2, max_sim_size):
+            new_dists = self.calc_new_dists(prev_dists)
+            new_dists = sorted(new_dists, key=lambda x: x[1])  # memory limiting factor
+            distances[q] = new_dists[:200]
+            prev_dists = new_dists[:1000]  # beam width
+        return distances
+
+    def calc_new_dists(self, prev_dists):
+        new_dists = []
+        memory = set()
+        for indexes, dist in prev_dists:
+            for i in set(range(1, self.n_calls + 1)) - indexes:
+                expanded_indexes = frozenset([*indexes, i])
+                if expanded_indexes in memory:
+                    continue
+                memory.add(expanded_indexes)
+                total = dist
+                for ind in indexes:
+                    total += (self.dist_matrix[self.calls[i][0], self.calls[ind][0]] +
+                              self.dist_matrix[self.calls[i][1], self.calls[ind][1]])
+                new_dists.append([expanded_indexes, total])
+        return new_dists
 
 
 def generate_problem(size=20):
