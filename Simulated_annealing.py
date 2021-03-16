@@ -7,31 +7,32 @@ from Operators import remove_insert, insert_first, insert_greedy, insert_beam_se
     remove_m, remove_l, remove_xl
 
 
-def simulated_annealing(pdp):
+def simulated_annealing(pdp, writer=None, instance_num=0):
 
     # constants:
-    time_limit = 10
+    time_limit = 100
     n_iterations = 100000
-    T_0 = 3000000
-    alpha = 0.9995
-    segment_size = 100
+    T_0 = 5 #3000000
+    alpha = 0.993 #0.9995
+    segment_size = 20
     memory = set()
     sigma_1 = 5
     sigma_2 = 2
     sigma_3 = 1
-    reaction_factor = 0.5
-
+    reaction_factor = 0.3
 
     # Operators and logic
     remove_operators = [remove_single_best, remove_longest_tour_deviation, remove_tour_neighbors,
                         remove_xs, remove_s, remove_m, remove_l, remove_xl]
     remove_probs = [0.125, 0.125, 0.125, 0.125, 0.125, 0.125, 0.125, 0.125]
+    #remove_probs = [1, 0, 0, 0, 0, 0, 0, 0]
     remove_indices = list(range(len(remove_operators)))
     remove_operator_scores = [0] * len(remove_operators)
     remove_operator_count = [0] * len(remove_operators)
     # --
     insert_operators = [insert_first, insert_greedy, insert_beam_search, insert_tour]
-    insert_probs = [0.2, 0.2, 0.2, 0.2]
+    insert_probs = [0, 0.33, 0.33, 0.33]
+    #insert_probs = [0, 1, 0, 0]
     insert_indices = list(range(len(insert_operators)))
     insert_operators_scores = [0] * len(insert_operators)
     insert_operators_count = [0] * len(insert_operators)
@@ -49,7 +50,7 @@ def simulated_annealing(pdp):
     start = time.time()
     for i in range(1, n_iterations):
         if time.time()-start > (time_limit-1):
-            print("total iterations:", i)
+            #print("total iterations:", i)
             break
 
         # Choose operators:
@@ -66,6 +67,17 @@ def simulated_annealing(pdp):
         insert_operators_count[insert_op_ind] += 1
         new_solution_id = str(new_solution)
         d_E = new_cost - cost
+
+        # monitoring
+        if writer:
+            writer.add_scalars(f"cost_{instance_num}", {
+                "incumbent": cost,
+                "best_cost": best_cost
+            }, i)
+            if d_E > 0:
+                writer.add_scalar(f"accept_prob_{instance_num}", math.e ** (-d_E / T), i)
+                writer.add_scalar(f"diff_{instance_num}", d_E, i)
+
         reward = 0
         if d_E < 0:
             solution = new_solution
@@ -105,6 +117,14 @@ def simulated_annealing(pdp):
                 insert_operators_count[j] = 0
                 insert_operators_scores[j] = 0
             insert_probs = [ip/sum(insert_probs) for ip in insert_probs]
+
+            if writer:
+                writer.add_scalars(f"insert_probs_{instance_num}", {
+                    str(ind): e for ind, e in enumerate(insert_probs)
+                }, i)  # tensorboard
+                writer.add_scalars(f"remove_probs_{instance_num}", {
+                    str(ind): e for ind, e in enumerate(remove_probs)
+                }, i)  # tensorboard
 
     # Finished
     return best_solution, best_cost

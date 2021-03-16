@@ -1,14 +1,11 @@
-import gym
-
 import torch
 import torch.optim as optim
 from model.model import QNet
 from tensorboardX import SummaryWriter
 
 from model.memory import Memory
-from config import env_name, goal_score, log_interval, device, lr
+from config import log_interval, device, lr
 
-from Simulated_annealing import simulated_annealing
 from PDP import generate_problem, load_pdp_from_file, PDP
 from Utils import objective_function, embed_solution
 from Operators import remove_insert, insert_first, insert_greedy, insert_beam_search, insert_tour, \
@@ -21,7 +18,7 @@ import pickle
 def main():
     torch.manual_seed(500)
 
-    SIZE = 20
+    SIZE = 100
     num_inputs = SIZE*11  # STEP * FEATURES (look at paper LU)
     num_actions = 8*4  # REMOVE_OPERATORS * INSERT_OPERATORS
     print('state size:', num_inputs)
@@ -30,7 +27,7 @@ def main():
     net = QNet(num_inputs, num_actions)
 
     optimizer = optim.Adam(net.parameters(), lr=lr)
-    writer = SummaryWriter('logs2')
+    writer = SummaryWriter('logs4')
 
     net.to(device)
     net.train()
@@ -46,13 +43,15 @@ def main():
     dataset = load_pdp_from_file("data/pdp_20/pdp20_TEST1_seed1234.pkl")
 
     cost_list = []
-    for e in range(300):
+    for e in range(500):
         memory = Memory()
 
         # generate random data:
         pdp = generate_problem(size=SIZE)
         # or fetch instance from file:
         #pdp = dataset[e]
+
+        pdp.initialize_close_calls()
 
 
 
@@ -65,7 +64,7 @@ def main():
 
         score = 0
 
-        for i in range(100):  # number of steps to improve solution
+        for i in range(10000):  # number of steps to improve solution
             steps += 1
 
             # GET ACTION
@@ -82,7 +81,7 @@ def main():
                 best_cost = cost
                 reward = 1
             else:
-                reward = 0
+                reward = -1
 
             next_state = embed_solution(pdp, solution)
             next_state = torch.tensor(next_state.flatten(), device=device, dtype=torch.float32)
@@ -97,7 +96,7 @@ def main():
         cost_list.append(best_cost)
         loss = QNet.train_model(net, memory.sample(), optimizer, device)  # carefull with sample(), maybe just go through it sequentially
         if e % log_interval == 0:
-            mean_cost = sum(cost_list[-100:]) / len(cost_list[-100:])
+            mean_cost = sum(cost_list[-50:]) / len(cost_list[-50:])
             print('{} episode | mean_cost: {:.2f}'.format(e, mean_cost))
             writer.add_scalar('log/score', float(score), e)
             writer.add_scalar('log/loss', float(loss), e)

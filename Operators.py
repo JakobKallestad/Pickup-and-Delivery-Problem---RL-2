@@ -3,6 +3,9 @@ import copy
 import math
 from Utils import objective_function, check_best_position_change, check_first_position_change, check_best_tour_spot, \
     beam_check_best_position_change
+# import multiprocessing as mp
+# from functools import partial
+# import time
 
 
 def remove_insert(pdp, solution, op):
@@ -120,13 +123,11 @@ def insert_beam_search(pdp, solution, removed_calls, beam_width=10, search_width
         second = i_call*2
         next_beam = []
         for sol, cost in beam:
-            assert cost != float('inf')
             i_j_cost_list = beam_check_best_position_change(pdp, sol, i_call, search_width)
             for i, j, add_cost in i_j_cost_list:
                 new_sol = copy.copy(sol)
                 new_sol.insert(i, first)
                 new_sol.insert(j, second)
-                assert add_cost != float('inf')
                 next_beam.append((new_sol, cost+add_cost))
         next_beam = sorted(next_beam, key=lambda x: x[1])[:beam_width]  # beam width
         beam = next_beam
@@ -147,11 +148,36 @@ def insert_tour(pdp, solution, removed_calls):
         temp_sol.insert(ij[1], i_call * 2)
 
     ind = check_best_tour_spot(pdp, solution, temp_sol)
+    assert ind is not None
     new_solution = solution[:ind] + temp_sol + solution[ind:]
     cost = objective_function(pdp, new_solution)
     #assert cost != float('inf')
     #assert len(new_solution) == 50
     return new_solution, cost
+
+
+# def check_insert_cost(pdp, solution, i_call):
+#     time.sleep(0.1)
+#     temp_solution = [e for e in solution if math.ceil(e / 2) != i_call]
+#     cost = objective_function(pdp, temp_solution)
+#     ij, add_cost = check_best_position_change(pdp, temp_solution, i_call)
+#     return (cost + add_cost, i_call, ij[0], ij[1])
+#
+# def insert_single_best(pdp, solution):
+#
+#     #print(list(zip([solution]*pdp.n_calls, [pdp]*pdp.n_calls, list(range(1, pdp.n_calls+1)))))
+#
+#     func = partial(check_insert_cost, pdp, solution)
+#     with mp.Pool() as pool:
+#         insertion_cost = pool.map(func, range(1, pdp.n_calls+1))
+#
+#     cost, i_call, i, j = min(insertion_cost, key=lambda x: x[0])
+#     solution = [e for e in solution if math.ceil(e/2) != i_call]
+#     solution.insert(i, i_call*2-1)
+#     solution.insert(j, i_call*2)
+#     # assert cost != float('inf')
+#     #assert len(solution) == 50
+#     return solution, cost
 
 
 def insert_single_best(pdp, solution):

@@ -1,3 +1,5 @@
+import random
+
 import numpy as np
 from Utils import distance
 import pickle
@@ -18,16 +20,17 @@ class PDP:
         self.capacities = capacities
         self.calls = calls
         self.dist_matrix = dist_matrix
-        self.initialize_close_calls()
+        #self.initialize_close_calls()
 
     def save_problem(self):
-        pass
+        with open('filename.pkl', 'wb') as file:
+            pickle.dump([self], file, protocol=pickle.HIGHEST_PROTOCOL)
 
     def initialize_close_calls(self):
         self.distances = self.calculate_close_calls()
 
     def calculate_close_calls(self):
-        max_sim_size = 21
+        max_sim_size = 11
         distances = [None] * max_sim_size
         prev_dists = list(zip([frozenset([i]) for i in range(1, self.n_calls + 1)], [0] * self.n_calls))
         for q in range(2, max_sim_size):
@@ -69,7 +72,7 @@ def generate_problem(size=20):
             dist_matrix[j, i] = d
 
     pdp = PDP(size, n_calls, locations, capacities, calls, dist_matrix)
-    pdp.save_problem()
+    #pdp.save_problem()
     return pdp
 
 
@@ -77,3 +80,24 @@ def load_pdp_from_file(filename):
     with open(filename, 'rb') as f:
         return pickle.load(f)
 
+
+def save_dataset(dataset=[], path='data/TEST.pkl'):
+    with open(path, 'wb') as file:
+        pickle.dump(dataset, file, protocol=pickle.HIGHEST_PROTOCOL)
+
+
+def generate_dataset_to_file(n_instances=10, SIZE=20, SEED=1234):
+    np.random.seed(SEED)
+    random.seed(SEED)
+    dataset = []
+    for i in range(n_instances):
+        print(i, "/", n_instances)
+        data = generate_problem(size=SIZE)
+        dataset.append(data)
+    save_dataset(dataset, path=f'data/pdp_{SIZE}/seed{SEED}_size{SIZE}_num{n_instances}.pkl')
+
+
+#n_instances = 100
+#SIZE = 100
+#SEED = 1234
+#generate_dataset_to_file(n_instances, SIZE, SEED)
