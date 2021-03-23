@@ -24,15 +24,19 @@ def simulated_annealing(pdp, writer=None, instance_num=0):
     # Operators and logic
     remove_operators = [remove_single_best, remove_longest_tour_deviation, remove_tour_neighbors,
                         remove_xs, remove_s, remove_m, remove_l, remove_xl]
-    remove_probs = [0.125, 0.125, 0.125, 0.125, 0.125, 0.125, 0.125, 0.125]
+    #remove_probs = [0.125, 0.125, 0.125, 0.125, 0.125, 0.125, 0.125, 0.125]
     #remove_probs = [1, 0, 0, 0, 0, 0, 0, 0]
+    #remove_probs = [0.5, 0, 0, 0.3, 0.2, 0, 0, 0] #26
+    remove_probs = [0.1, 0, 0, 0.75, 0.1, 0.05, 0, 0] #27 (will try next)
     remove_indices = list(range(len(remove_operators)))
     remove_operator_scores = [0] * len(remove_operators)
     remove_operator_count = [0] * len(remove_operators)
     # --
     insert_operators = [insert_first, insert_greedy, insert_beam_search, insert_tour]
-    insert_probs = [0, 0.33, 0.33, 0.33]
+    #insert_probs = [0, 0.33, 0.33, 0.33]
     #insert_probs = [0, 1, 0, 0]
+    #insert_probs = [0, 0.3, 0.7, 0] # 26
+    insert_probs = [0, 0, 1, 0] #27 (will try next)
     insert_indices = list(range(len(insert_operators)))
     insert_operators_scores = [0] * len(insert_operators)
     insert_operators_count = [0] * len(insert_operators)
@@ -101,7 +105,7 @@ def simulated_annealing(pdp, writer=None, instance_num=0):
         memory.add(new_solution_id)
 
         # UPDATE weights
-        if i % segment_size == 0:
+        if i % segment_size == -1:  # testing fixed probabilities
             for j in range(len(remove_operators)):
                 if remove_operator_count[j] == 0:
                     remove_operator_count[j] = float('inf')

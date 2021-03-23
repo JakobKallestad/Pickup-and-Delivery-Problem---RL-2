@@ -1,0 +1,2 @@
+This run featured fixed uniform probabilities of all combinations of remove and insert operators, including remove_first.
+It also featured a starting temperature of 5 and a cooling schedule of 0.993.

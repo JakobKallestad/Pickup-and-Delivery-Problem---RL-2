@@ -13,3 +13,11 @@ insert_op = insert_operators[action % 3]
 op = (remove_op, insert_op)
 
 print(op)
+
+
+size = 50
+
+import random
+
+a = set(random.sample(range(1, 51), 30))
+print(a)

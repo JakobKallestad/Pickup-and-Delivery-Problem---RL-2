@@ -1,0 +1,5 @@
+T_0 = 5
+alpha = 0.996
+
+Fixed probabilities uniform including insert_first
+segment_size = 20
