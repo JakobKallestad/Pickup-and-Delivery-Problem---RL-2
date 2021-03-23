@@ -117,5 +117,7 @@ def simulated_annealing(pdp, writer=None, instance_num=0):
                     operator_names[ind]: e for ind, e in enumerate(operators_probs)
                 }, i)  # tensorboard
 
+        writer.flush()
+
     # Finished
     return best_solution, best_cost
