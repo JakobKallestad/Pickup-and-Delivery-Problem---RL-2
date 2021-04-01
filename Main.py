@@ -13,14 +13,15 @@ random.seed(SEED)
 
 n_runs = 1
 best_scores = []
-#writer = SummaryWriter('logs_55')
 
-dataset = load_pdp_from_file("data/pdp_100/seed1234_size100_num100.pkl")
+dataset = load_pdp_from_file("data/pdp_20/seed1234_size20_num100.pkl")
 for i in range(1, 100):
-    writer = SummaryWriter('logs_58')
+    writer = SummaryWriter('logs_56')
 
     #pdp = generate_problem(size=100)
     pdp = dataset[i-1]
+    print(pdp.capacities)
+    assert False
 
     #pdp.initialize_close_calls()
 
